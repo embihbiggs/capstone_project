@@ -15,11 +15,8 @@ permissions:
   id-token: write
   contents: read
 
+ # 1. Build & Unit Test
 jobs:
-
-  # -----------------------------------------------------------
-  # 1. Build & Unit Test
-  # -----------------------------------------------------------
   build:
     name: Build & Unit Test
     runs-on: ubuntu-latest
@@ -49,9 +46,7 @@ jobs:
         if: hashFiles('**/package.json') != ''
         run: npm test
 
-  # -----------------------------------------------------------
   # 2. SAST (SonarCloud) + SCA (Snyk)
-  # -----------------------------------------------------------
   sast_sca:
     name: SAST & SCA Scans
     runs-on: ubuntu-latest
@@ -94,9 +89,7 @@ jobs:
         with:
           command: monitor
 
-  # -----------------------------------------------------------
   # 3. Terraform Plan
-  # -----------------------------------------------------------
   terraform_plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
@@ -154,9 +147,7 @@ jobs:
             ${{ env.TF_WORKING_DIR }}/tfplan
             ${{ env.TF_WORKING_DIR }}/tfplan.json
 
-  # -----------------------------------------------------------
   # 4. Manual Approval
-  # -----------------------------------------------------------
   manual_approval:
     name: Manual Approval
     runs-on: ubuntu-latest
@@ -166,9 +157,7 @@ jobs:
       - name: Await Approval
         uses: hmarr/auto-approve-action@v2
 
-  # -----------------------------------------------------------
   # 5. Terraform Apply
-  # -----------------------------------------------------------
   terraform_apply:
     name: Terraform Apply
     runs-on: ubuntu-latest
@@ -198,10 +187,7 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform apply -auto-approve tfplan
 
-
-  # -----------------------------------------------------------
   # 6. DAST (OWASP ZAP)
-  # -----------------------------------------------------------
   dast_zap:
     name: DAST Scan (OWASP ZAP)
     runs-on: ubuntu-latest
@@ -224,10 +210,7 @@ jobs:
           name: zap-report-${{ github.run_id }}
           path: zap_report.html
 
-
-  # -----------------------------------------------------------
   # 7. AWS Security Services Enablement
-  # -----------------------------------------------------------
   aws_security_services:
     name: AWS Security Services Setup
     runs-on: ubuntu-latest
@@ -250,10 +233,7 @@ jobs:
           aws securityhub batch-enable-standards \
             --standards-subscription-requests StandardsArn=arn:aws:securityhub:::ruleset/cis-aws-foundations-benchmark/v/1.2.0 || true
 
-
-  # -----------------------------------------------------------
   # 8. Compliance & Reporting
-  # -----------------------------------------------------------
   compliance_report:
     name: Compliance & Findings Report
     runs-on: ubuntu-latest
@@ -276,10 +256,7 @@ jobs:
           name: aws-security-findings-${{ github.run_id }}
           path: security_findings.json
 
-
-  # -----------------------------------------------------------
   # 9. Notifications
-  # -----------------------------------------------------------
   notify:
     name: Notify Team
     runs-on: ubuntu-latest
